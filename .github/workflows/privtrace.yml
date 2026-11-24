@@ -1,0 +1,59 @@
+# Copy to .github/workflows/privtrace.yml in your repository, next to a .privtrace.yml
+# (create one with `privtrace init`). Then make "PrivTrace compliance gate" a required status
+# check on main (Settings → Branches → Branch protection rules) so failing PRs cannot merge.
+name: PrivTrace compliance gate
+
+on:
+  pull_request:
+    branches: [main, production]   # the gate: catch problems before they merge
+  push:
+    branches: [main]               # record the main-branch score
+  schedule:
+    - cron: "30 3 * * 1"           # weekly: packs change even when code does not
+  workflow_dispatch:
+
+permissions:
+  contents: read          # check out the code
+  pull-requests: write    # post / update the sticky PR comment
+  security-events: write  # upload SARIF to code scanning (inline PR annotations)
+
+concurrency:
+  group: privtrace-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  privtrace:
+    name: PrivTrace compliance gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed to compare with the base branch
+
+      - name: PrivTrace
+        id: privtrace
+        uses: dhwani1608/PrivTrace@main   # pin a tag or commit SHA in production
+        with:
+          config: .privtrace.yml
+          comment: true
+          # Optional: only used if .privtrace.yml sets ai.enabled: true (off by default).
+          # gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+          # gemini-model: ${{ vars.GEMINI_MODEL }}
+          # Optional: score history in the PrivTrace web UI (sends scores + finding metadata, no code).
+          # upload-url: https://privtrace-836138728232.asia-south1.run.app
+          # upload-token: ${{ secrets.PRIVTRACE_TOKEN }}
+
+      - name: Upload SARIF (Security tab + PR annotations)
+        if: always() && steps.privtrace.outputs.sarif-file != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.privtrace.outputs.sarif-file }}
+          category: privtrace
+
+      - name: Upload the full report
+        if: always() && steps.privtrace.outputs.report-dir != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: privtrace-report
+          path: ${{ steps.privtrace.outputs.report-dir }}
+          retention-days: 30

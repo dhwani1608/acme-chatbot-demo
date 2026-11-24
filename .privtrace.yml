@@ -1,0 +1,58 @@
+# PrivTrace configuration: which compliance packs and rules apply to this repository,
+# and when the CI gate should block a merge. Reference: docs/CI_INTEGRATION.md
+# Findings are engineering evidence, not legal advice.
+version: 1
+
+# Frameworks the business selected (`privtrace packs list` shows all of them).
+packs: [dpdp-2023, certin-2022, security-baseline]
+
+rules:
+  # Rules that do not apply. Each needs a reason; they are listed in every report.
+  disable:
+    - id: CERTIN-REC-01
+      reason: "Acme does not provide data centre, VPS, cloud or VPN services"
+  #  - id: GDPR-TRF-02
+  #    reason: "No personal data leaves India"
+  severity_overrides: {}   # e.g. { DPDP-RET-01: critical }
+
+paths:
+  include: []   # empty = whole repository
+  exclude: [tests/fixtures/, migrations/]
+
+# Answers to the manual checklist, so CI can score organisational controls.
+# yes = passed, no = failed, not_sure = needs review.
+manual_answers:
+  DPDP-RET-02: yes   # Do you have a documented retention period for each kind of personal data, and a job that erases it when the pe
+  DPDP-CON-01: yes   # Before collecting personal data, do you show a notice of what is collected and why, and record the user's cons
+  DPDP-PRC-01: yes   # Do you have a signed contract with every Data Processor (including LLM / AI API vendors) that processes person
+  DPDP-BRE-01: yes   # Do you have a documented process to detect a personal data breach and notify the Data Protection Board and eac
+  DPDP-CHD-01: yes   # If people under 18 can use the service, do you obtain verifiable parental consent and avoid tracking or target
+  DPDP-GRV-01: yes   # Have you published the contact details of a DPO or a person who can answer questions about data processing, an
+  DPDP-XB-01: not_sure   # Where personal data is processed outside India (e.g. a foreign LLM API region), have you confirmed the destina
+  CERTIN-LOG-01: yes   # Are logs of all your ICT systems (application, server, network, cloud) enabled and maintained securely?
+  CERTIN-LOG-02: yes   # Are logs retained for a rolling period of at least 180 days?
+  CERTIN-LOG-03: yes   # Are the 180 days of logs stored within India (e.g. an India cloud region)?
+  CERTIN-TIME-01: yes   # Are all system clocks synchronised to NTP servers of NIC or NPL, or to servers traceable to them?
+  CERTIN-INC-01: yes   # Do you have a process to report the listed cyber incidents to CERT-In within 6 hours of noticing them?
+  CERTIN-INC-02: yes   # Do your logs and alerts capture the incident types listed in the directions (e.g. unauthorised access, data br
+  CERTIN-POC-01: yes   # Have you designated a Point of Contact to interface with CERT-In and shared their details?
+  SECB-MAN-01: yes   # Do you run automated dependency vulnerability scanning (e.g. pip-audit, Dependabot) in CI?
+  SECB-MAN-02: not_sure   # Are production databases, caches, vector stores and backups encrypted at rest?
+
+gate:
+  min_score: 75              # overall score threshold (0-100)
+  min_score_per_pack: { dpdp-2023: 75 }
+  fail_on_severity: high     # fail if any NEW failed finding is at least this severe (or: none)
+  new_findings_only: true    # judge a PR only on what it introduces (needs a baseline)
+
+ai:
+  enabled: false             # default: no code leaves the CI runner
+
+report:
+  pr_comment: true
+  sarif: true
+  job_summary: true
+  fix_prompts: true
+
+baseline:
+  file: .privtrace-baseline.json
