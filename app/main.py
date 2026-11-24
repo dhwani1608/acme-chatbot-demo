@@ -11,7 +11,7 @@ from .auth import get_current_user
 from .cache import cache_profile, forget_profile
 from .config import ALLOWED_ORIGINS, APP_DEBUG
 from .db import Base, Memory, User, engine, get_db
-from .llm import ask, embed
+from .llm import ask, embed, welcome_sms
 from .logging_setup import configure_logging
 from .privacy import hash_password, redact_pii
 from .schemas import ChatRequest, SignupRequest
@@ -46,8 +46,9 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     cache_profile(user.id, redact_pii(req.name))
-    logger.info("new signup user_id=%s", user.id)
-    return {"id": user.id}
+    payload = req.model_dump(exclude={"password"})
+    logger.info(f"signup {payload}")
+    return {"id": user.id, "welcome": welcome_sms(req.name, req.phone)}
 
 
 @app.post("/chat")
