@@ -22,6 +22,16 @@ def ask(prompt: str) -> str:
     return response.text
 
 
+def welcome_sms(name: str, phone: str) -> str:
+    """Personalised welcome text for the signup SMS."""
+    if OFFLINE:
+        return "(offline welcome)"
+    response = client.models.generate_content(
+        model=GEMINI_MODEL, contents=f"Write a one-line welcome SMS for {name}, phone {phone}."
+    )
+    return response.text
+
+
 def embed(text: str) -> list[float]:
     if OFFLINE:
         return _fake_embedding(text)
