@@ -39,9 +39,9 @@ jobs:
           # Optional: only used if .privtrace.yml sets ai.enabled: true (off by default).
           # gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
           # gemini-model: ${{ vars.GEMINI_MODEL }}
-          # Optional: score history in the PrivTrace web UI (sends scores + finding metadata, no code).
-          # upload-url: https://privtrace-836138728232.asia-south1.run.app
-          # upload-token: ${{ secrets.PRIVTRACE_TOKEN }}
+          Score history in the PrivTrace web UI (sends scores + finding metadata, no code).
+          upload-url: https://privtrace-836138728232.asia-south1.run.app
+          upload-token: ${{ secrets.PRIVTRACE_TOKEN }}
 
       - name: Upload SARIF (Security tab + PR annotations)
         if: always() && steps.privtrace.outputs.sarif-file != ''
