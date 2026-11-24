@@ -11,9 +11,9 @@ All names, numbers and keys in this repository are fake.
 
 | Pull request | Change | Gate |
 |---|---|---|
-| [Add /health endpoint](../../pulls?q=is%3Apr+health) | harmless new endpoint | ✅ passes, score unchanged |
-| [Personalised welcome SMS](../../pulls?q=is%3Apr+welcome) | logs the signup payload and sends the user's phone number to Gemini | ❌ fails: new high/critical findings, DPDP score drops |
-| [Welcome SMS, privacy-safe](../../pulls?q=is%3Apr+privacy-safe) | the same feature after applying PrivTrace's AI fix prompt | ✅ passes again |
+| [Add /health endpoint](../../pull/1) | harmless new endpoint | ✅ passes, score unchanged |
+| [Personalised welcome SMS via Gemini](../../pull/2) | logs the signup payload and sends the user's phone number to Gemini | ❌ fails: new high/critical findings, DPDP score drops |
+| [Welcome SMS via Gemini (privacy-safe)](../../pull/3) | the same feature after applying PrivTrace's AI fix prompt | ✅ passes again |
 
 Open the failing PR to see:
 
