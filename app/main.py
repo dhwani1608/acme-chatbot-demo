@@ -37,6 +37,11 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 @app.post("/signup")
 def signup(req: SignupRequest, db: Session = Depends(get_db)):
     if not req.consent_given:
