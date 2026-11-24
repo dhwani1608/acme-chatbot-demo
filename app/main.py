@@ -46,8 +46,7 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     cache_profile(user.id, redact_pii(req.name))
-    payload = req.model_dump(exclude={"password"})
-    logger.info(f"signup {payload}")
+    logger.info("new signup user_id=%s", user.id)
     return {"id": user.id, "welcome": welcome_sms(req.name, req.phone)}
 
 

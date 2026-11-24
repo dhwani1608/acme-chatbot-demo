@@ -22,14 +22,15 @@ def ask(prompt: str) -> str:
     return response.text
 
 
-def welcome_sms(name: str, phone: str) -> str:
+def welcome_sms(name: str, phone: str) -> str:  # phone is for the SMS sender only
     """Personalised welcome text for the signup SMS."""
     if OFFLINE:
         return "(offline welcome)"
     response = client.models.generate_content(
-        model=GEMINI_MODEL, contents=f"Write a one-line welcome SMS for {name}, phone {phone}."
+        # Data minimisation: the model gets no personal data, only a placeholder.
+        model=GEMINI_MODEL, contents="Write a one-line welcome SMS for a new Acme Chat user. Write {name} where their name goes."
     )
-    return response.text
+    return response.text.replace("{name}", name)
 
 
 def embed(text: str) -> list[float]:
